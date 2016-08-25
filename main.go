@@ -20,21 +20,18 @@ func main() {
 		panic(err.Error())
 	}
 
-	err = feed.Run(ctx)
+	err = feed.Run(ctx, false)
 	if err != nil {
 		panic(err.Error())
 	}
-	ctx.Info.Println("feed running")
 
-	err = check.Run(ctx)
+	err = check.Run(ctx, false)
 	if err != nil {
 		panic(err.Error())
 	}
-	ctx.Info.Println("check running")
 
-	err = submit.Run(ctx)
+	err = submit.Run(ctx, true)
 	if err != nil {
 		panic(err.Error())
 	}
-	ctx.Info.Println("submit running")
 }

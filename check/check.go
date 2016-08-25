@@ -11,12 +11,14 @@ import (
 	"github.com/streadway/amqp"
 )
 
+// local context
 type cCtx struct {
 	*lib.Ctx
 
 	Producer *lib.QueueHandler // the queue read by submit
 }
 
+// elemt of the watch map
 type watchElem struct {
 	Req     *lib.InternalRequest
 	Msg     *amqp.Delivery
@@ -28,7 +30,8 @@ var (
 	watchMapMutex = &sync.Mutex{}
 )
 
-func Run(ctx *lib.Ctx) error {
+// Run starts the check module either blocking or non-blocking.
+func Run(ctx *lib.Ctx, blocking bool) error {
 	producer, err := ctx.SetupQueue("totem-dynamic-submit-" + ctx.Config.QueueSuffix)
 	if err != nil {
 		return err
@@ -40,14 +43,18 @@ func Run(ctx *lib.Ctx) error {
 	}
 
 	go c.checkLoop()
-	go c.Consume("totem-dynamic-check-"+ctx.Config.QueueSuffix, ctx.Config.CheckPrefetchCount, c.parseMsg)
+	if blocking {
+		c.Consume("totem-dynamic-check-"+ctx.Config.QueueSuffix, ctx.Config.CheckPrefetchCount, c.parseMsg)
+	} else {
+		go c.Consume("totem-dynamic-check-"+ctx.Config.QueueSuffix, ctx.Config.CheckPrefetchCount, c.parseMsg)
+	}
 
 	return nil
 }
 
 // parseMsg accepts an *amqp.Delivery and parses the body assuming
-// it's a request from crits. On success the parsed struct is
-// send to handleSubmit.
+// it's a request from feed. On success the parsed struct is
+// added to the watchMap.
 func (c *cCtx) parseMsg(msg amqp.Delivery) {
 	req := &lib.InternalRequest{}
 	err := json.Unmarshal(msg.Body, req)
@@ -74,7 +81,8 @@ func (c *cCtx) parseMsg(msg amqp.Delivery) {
 }
 
 // checkLoop loops over the watch map and checks if the
-// task is done and if so sends the task to submit.
+// task is done or if an error occured and if so sends
+// the task to submit or the failed queue.
 func (c *cCtx) checkLoop() {
 	waitDuration := time.Second * time.Duration(c.Config.WaitBetweenRequests)
 

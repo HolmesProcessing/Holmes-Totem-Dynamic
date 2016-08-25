@@ -12,13 +12,15 @@ import (
 	"github.com/streadway/amqp"
 )
 
+// local context
 type fCtx struct {
 	*lib.Ctx
 
 	Producer *lib.QueueHandler // the queue read by check
 }
 
-func Run(ctx *lib.Ctx) error {
+// Run starts the feed module either blocking or non-blocking.
+func Run(ctx *lib.Ctx, blocking bool) error {
 	producer, err := ctx.SetupQueue("totem-dynamic-check-" + ctx.Config.QueueSuffix)
 	if err != nil {
 		return err
@@ -29,7 +31,11 @@ func Run(ctx *lib.Ctx) error {
 		producer,
 	}
 
-	go c.Consume(ctx.Config.ConsumeQueue, ctx.Config.FeedPrefetchCount, c.parseMsg)
+	if blocking {
+		c.Consume(ctx.Config.ConsumeQueue, ctx.Config.FeedPrefetchCount, c.parseMsg)
+	} else {
+		go c.Consume(ctx.Config.ConsumeQueue, ctx.Config.FeedPrefetchCount, c.parseMsg)
+	}
 
 	return nil
 }
@@ -49,10 +55,6 @@ func (c *fCtx) parseMsg(msg amqp.Delivery) {
 	//	return
 	//}
 
-	// TODO: revalidate if this is necessary at all...
-	// spawn in a new thread since the request
-	// via web can be time consuming and we don't
-	// want to slow down the queue processing
 	for serviceName, _ := range req.Tasks {
 		urls, check := c.Config.Services[serviceName]
 		if !check {
@@ -72,16 +74,17 @@ func (c *fCtx) parseMsg(msg amqp.Delivery) {
 	}
 }
 
-// handleSubmit schedules the upload of a new sample to
-// cuckoo. On success the information is passed to the
-// check_results queue.
+// handleFeeding checks the status of the respective service
+// and uploads the new sample if everything is fine. If not
+// either an error is send or a waiting timer is actived.
 func (c *fCtx) handleFeeding(req *lib.ExternalRequest, service *lib.Service, msg *amqp.Delivery) {
-	// check if the service has open capacity
+	// get the status of the service
 	status, err := service.Status()
 	if c.NackOnError(err, "Service is not existing on this node", msg) {
 		return
 	}
 
+	// check if the service has free capacity
 	for status.FreeSlots <= 0 {
 		c.Debug.Println("Slowdown: No free slots")
 		time.Sleep(time.Second * 30)
@@ -92,6 +95,7 @@ func (c *fCtx) handleFeeding(req *lib.ExternalRequest, service *lib.Service, msg
 		}
 	}
 
+	// differentiate between downloadable samples and URLs
 	sample := ""
 	if req.Download {
 		// we need to download the sample to /tmp
@@ -129,6 +133,7 @@ func (c *fCtx) handleFeeding(req *lib.ExternalRequest, service *lib.Service, msg
 		sample = req.Filename
 	}
 
+	// create new task
 	resp, err := service.NewTask(sample)
 	if c.NackOnError(err, "Feeding sample to service failed", msg) {
 		return
@@ -146,6 +151,7 @@ func (c *fCtx) handleFeeding(req *lib.ExternalRequest, service *lib.Service, msg
 		return
 	}
 
+	// send to check
 	c.Producer.Send(internalReq)
 	if err := msg.Ack(false); err != nil {
 		c.Warning.Println("Sending ACK failed!", err.Error())

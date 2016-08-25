@@ -16,6 +16,7 @@ import (
 	"github.com/streadway/amqp"
 )
 
+// general context struct
 type Ctx struct {
 	Config *Config
 
@@ -53,7 +54,7 @@ type Config struct {
 	SubmitPrefetchCount int
 }
 
-// request from outside to totem-dynamic
+// request from the gateway to totem-dynamic
 type ExternalRequest struct {
 	PrimaryURI   string              `json:"primaryURI"`
 	SecondaryURI string              `json:"secondaryURI"`
@@ -76,6 +77,9 @@ type InternalRequest struct {
 	OriginalRequest *ExternalRequest
 }
 
+// Init prepares all fields of the given Ctx sturct and
+// returns an error if something went wrong. By default
+// you should panic if an error is returned.
 func (c *Ctx) Init(cPath string) error {
 	var err error
 
@@ -102,6 +106,8 @@ func (c *Ctx) Init(cPath string) error {
 	return nil
 }
 
+// loadConfig loads the config file from the given path and
+// returns a pointer to an populated Config struct.
 func loadConfig(cPath string) (*Config, error) {
 	cPath = strings.TrimSpace(cPath)
 
@@ -131,6 +137,7 @@ func loadConfig(cPath string) (*Config, error) {
 	return conf, err
 }
 
+// setupLogging populates the debug, info and warning logger of the context.
 func (c *Ctx) setupLogging() error {
 	// default: only log to stdout
 	handler := io.MultiWriter(os.Stdout)
@@ -171,9 +178,8 @@ func (c *Ctx) setupLogging() error {
 	return nil
 }
 
-// setupClient populates the http client so we have one client
-// which can keep the connections open so there is no need to
-// start a new connection for each request.
+// setupClient populates the http client so there is only one client
+// in the context which can keep connections open to improve preformance.
 func (c *Ctx) setupClient() {
 	tr := &http.Transport{}
 	if !c.Config.VerifySSL {
@@ -186,7 +192,8 @@ func (c *Ctx) setupClient() {
 }
 
 // FastGet is a wrapper for http.Get which returns only
-// the important data from the request.
+// the important data from the request and makes sure
+// everyting is closed properly.
 func FastGet(c *http.Client, url string, structPointer interface{}) ([]byte, int, error) {
 	resp, err := c.Get(url)
 	if err != nil {

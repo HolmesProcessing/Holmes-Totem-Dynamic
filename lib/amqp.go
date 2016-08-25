@@ -125,10 +125,10 @@ func (q *QueueHandler) Send(msg []byte) error {
 	return nil
 }
 
-// nackOnError accepts an error, error description, and amqp
-// message. If the error is not nil a NACK is send in replay
+// NackOnError accepts an error, error description, and amqp
+// message. If the error is not nil a NACK is sent in reply
 // to the msg. The msg will be redirected to the failed queue
-// so the overseer can handle it.
+// so the overseer, ehhm, "something" can handle it.
 func (c *Ctx) NackOnError(err error, desc string, msg *amqp.Delivery) bool {
 	if err != nil {
 		c.Warning.Println("[NACK]", desc, err.Error())

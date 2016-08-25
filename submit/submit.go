@@ -33,7 +33,8 @@ type Result struct {
 	FinishedDateTime time.Time `json:"finished_date_time"`
 }
 
-func Run(ctx *lib.Ctx) error {
+// Run starts the submit module either blocking or non-blocking.
+func Run(ctx *lib.Ctx, blocking bool) error {
 	producer, err := ctx.SetupQueue(ctx.Config.ResultsQueue) // should be "totem_output"
 	if err != nil {
 		return err
@@ -44,8 +45,11 @@ func Run(ctx *lib.Ctx) error {
 		producer,
 	}
 
-	// no "go ..." here since this should be blocking so everything stays open
-	c.Consume("totem-dynamic-submit-"+ctx.Config.QueueSuffix, ctx.Config.SubmitPrefetchCount, c.parseMsg)
+	if blocking {
+		c.Consume("totem-dynamic-submit-"+ctx.Config.QueueSuffix, ctx.Config.SubmitPrefetchCount, c.parseMsg)
+	} else {
+		go c.Consume("totem-dynamic-submit-"+ctx.Config.QueueSuffix, ctx.Config.SubmitPrefetchCount, c.parseMsg)
+	}
 
 	return nil
 }
