@@ -1,0 +1,23 @@
+{
+	"Amqp"         : "amqp://USER:PASSWORD@HOST:PORT",
+	"QueueSuffix"  : "",
+	"ConsumeQueue" : "totem_dynamic_input",
+	"ResultsQueue" : "totem_results",
+	"FailedQueue"  : "totem_dynamic_failed",
+
+	"LogFile"   : "/leave/empty/for/no/log/or/path/to/file.txt",
+	"LogLevel"  : "info",
+	"VerifySSL" : true,
+
+	"Services" : {
+		"virustotal": [],
+		"cuckoo": []
+	},
+
+	"FeedPrefetchCount": 1,
+
+	"CheckPrefetchCount": 100,
+	"WaitBetweenRequests": 30,
+
+	"SubmitPrefetchCount": 5
+}
