@@ -1,0 +1,12 @@
+language: go
+
+go:
+  - 1.6.2
+
+# this fixes go imports
+before_install:
+  - RepoName=`basename $PWD`; SrcDir=`dirname $PWD`; DestDir="`dirname $SrcDir`/HolmesProcessing"
+  - if [[ "$SrcDir" != "$DestDir" ]]; then mv "$SrcDir" "$DestDir"; cd ../../HolmesProcessing/$RepoName; export TRAVIS_BUILD_DIR=`dirname $TRAVIS_BUILD_DIR`/$RepoName; fi 
+
+install:
+  - go get github.com/streadway/amqp
