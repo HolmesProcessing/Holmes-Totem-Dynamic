@@ -114,7 +114,7 @@ func loadConfig(cPath string) (*Config, error) {
 	// no path given, try to search in the local directory
 	if cPath == "" {
 		cPath, _ = filepath.Abs(filepath.Dir(os.Args[0]))
-		cPath += "/totem-dynamic.conf.json"
+		cPath += "/config/totem-dynamic.conf"
 	}
 
 	conf := &Config{}
