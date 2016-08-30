@@ -147,7 +147,7 @@ func (c *sCtx) submitResults(req *lib.InternalRequest, msg *amqp.Delivery) {
 	}
 
 	// cleanup time
-	if err := os.Remove(req.FilePath); err != nil {
+	if err := os.Remove("/tmp/" + req.FilePath); err != nil {
 		c.Warning.Printf("Could not delete file %s: %s\n", req.FilePath, err.Error())
 	}
 }

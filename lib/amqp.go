@@ -85,7 +85,7 @@ func (c *Ctx) Consume(queue string, prefetchCount int, fn func(msg amqp.Delivery
 
 	go func() {
 		for m := range msgs {
-			c.Info.Println("Received a message")
+			c.Debug.Println("Received a message on", queue)
 			fn(m)
 		}
 	}()
