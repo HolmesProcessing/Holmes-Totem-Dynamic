@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"time"
 
 	"github.com/HolmesProcessing/Holmes-Totem-Dynamic/lib"
@@ -143,5 +144,10 @@ func (c *sCtx) submitResults(req *lib.InternalRequest, msg *amqp.Delivery) {
 
 	if err := msg.Ack(false); err != nil {
 		c.Warning.Println("Sending ACK failed!", err.Error())
+	}
+
+	// cleanup time
+	if err := os.Remove("/tmp/" + req.FilePath); err != nil {
+		c.Warning.Printf("Could not delete file %s: %s\n", req.FilePath, err.Error())
 	}
 }

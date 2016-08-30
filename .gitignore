@@ -1,2 +1,3 @@
 Holmes-Totem-Dynamic
-totem-dynamic.conf
+config/totem-dynamic.conf
+services/**/service.conf

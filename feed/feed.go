@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io/ioutil"
 	"math/rand"
+	"path/filepath"
 	"time"
 
 	"github.com/HolmesProcessing/Holmes-Totem-Dynamic/lib"
@@ -126,7 +127,7 @@ func (c *fCtx) handleFeeding(req *lib.ExternalRequest, service *lib.Service, msg
 			return
 		}
 
-		sample = tmpFile.Name()
+		sample = filepath.Base(tmpFile.Name())
 	} else {
 		// we do not need to download the sample
 		// the filename "is the sample data"

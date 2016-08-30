@@ -10,3 +10,5 @@ before_install:
 
 install:
   - go get github.com/streadway/amqp
+
+script: go test -v .
