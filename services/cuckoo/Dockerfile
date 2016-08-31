@@ -9,7 +9,6 @@ RUN apk add --no-cache \
 		git \
 	&& go get github.com/julienschmidt/httprouter \
 	&& rm -rf /var/cache/apk/*
-RUN go get github.com/gorilla/mux
 
 # add the files to the container
 ADD . /go/src/cuckoo/

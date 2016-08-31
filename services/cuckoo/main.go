@@ -9,25 +9,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/gorilla/mux"
-
 	"cuckoo/cuckoo"
 )
 
 type Config struct {
-	Metadata *Metadata
-	Settings *Settings
-}
-
-type Metadata struct {
-	Name        string
-	Version     string
-	Description string
-	Copyright   string
-	License     string
-}
-
-type Settings struct {
 	HTTPBinding    string
 	VerifySSL      bool
 	CheckFreeSpace bool
@@ -92,23 +77,22 @@ func main() {
 		panic(err.Error())
 	}
 
-	cuckoo, err := cuckoo.New(ctx.Config.Settings.CuckooURL, ctx.Config.Settings.VerifySSL)
+	cuckoo, err := cuckoo.New(ctx.Config.CuckooURL, ctx.Config.VerifySSL)
 	if err != nil {
 		panic(err.Error())
 	}
 	ctx.Cuckoo = cuckoo
 
 	// prepare routing
-	r := mux.NewRouter()
+	r := http.NewServeMux()
 	r.HandleFunc("/status/", HTTPStatus)
-	r.HandleFunc("/feed/{sample}", HTTPFeed)
-	r.HandleFunc("/check/{taskID}", HTTPCheck)
-	r.HandleFunc("/results/{taskID}", HTTPResults)
-	http.Handle("/", r)
+	r.HandleFunc("/feed/", HTTPFeed)
+	r.HandleFunc("/check/", HTTPCheck)
+	r.HandleFunc("/results/", HTTPResults)
 
 	srv := &http.Server{
 		Handler:      r,
-		Addr:         ctx.Config.Settings.HTTPBinding,
+		Addr:         ctx.Config.HTTPBinding,
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
@@ -130,9 +114,9 @@ func HTTPStatus(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp.FreeSlots = ctx.Config.Settings.MaxPending - s.Tasks.Pending
+	resp.FreeSlots = ctx.Config.MaxPending - s.Tasks.Pending
 
-	if ctx.Config.Settings.CheckFreeSpace {
+	if ctx.Config.CheckFreeSpace {
 		if s.Diskspace.Analyses.Free <= 256*1024*1024 {
 			resp.Degraded = true
 			resp.Error = "Disk is full!"
@@ -148,8 +132,7 @@ func HTTPFeed(w http.ResponseWriter, r *http.Request) {
 		TaskID: "",
 	}
 
-	vars := mux.Vars(r)
-	sample := vars["sample"]
+	sample := r.URL.Query().Get("obj")
 	if sample == "" {
 		resp.Error = "No sample given"
 		HTTP500(w, r, resp)
@@ -185,8 +168,7 @@ func HTTPCheck(w http.ResponseWriter, r *http.Request) {
 		Done:  false,
 	}
 
-	vars := mux.Vars(r)
-	taskIDstr := vars["taskID"]
+	taskIDstr := r.URL.Query().Get("taskid")
 	if taskIDstr == "" {
 		resp.Error = "No taskID given"
 		HTTP500(w, r, resp)
@@ -211,8 +193,7 @@ func HTTPResults(w http.ResponseWriter, r *http.Request) {
 		Error: "",
 	}
 
-	vars := mux.Vars(r)
-	taskIDstr := vars["taskID"]
+	taskIDstr := r.URL.Query().Get("taskid")
 	if taskIDstr == "" {
 		resp.Error = "No taskID given"
 		HTTP500(w, r, resp)

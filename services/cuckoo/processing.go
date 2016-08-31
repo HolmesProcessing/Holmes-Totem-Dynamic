@@ -96,7 +96,7 @@ func processReportBehavior(behavior *cuckoo.TasksReportBehavior) []*CrtResult {
 			procDescription := fmt.Sprintf("%s (%d)", p.Name, p.Id)
 			for _, c := range p.Calls {
 
-				if pushCounter >= ctx.Config.Settings.MaxAPICalls {
+				if pushCounter >= ctx.Config.MaxAPICalls {
 					break
 				}
 

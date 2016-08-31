@@ -1,19 +1,10 @@
 {
-	"MetaData":{
-		"Name":"cuckoo",
-		"Version":"1.0",
-		"Description":"./README.md",
-		"Copyright":"Copyright 2016 Holmes Group LLC",
-		"License":"./LICENSE"
-	},
-	"Settings":{
-		"HTTPBinding":":8080",
-		"VerifySSL":true,
-		"CheckFreeSpace":true,
-		"CuckooURL":"http://127.0.0.1:8090",
-		"MaxPending":5,
-		"MaxAPICalls":10000,
-		"LogFile":"",
-		"LogLevel":"debug"
-	}
+	"HTTPBinding":":8080",
+	"VerifySSL":true,
+	"CheckFreeSpace":true,
+	"CuckooURL":"http://127.0.0.1:8090",
+	"MaxPending":5,
+	"MaxAPICalls":10000,
+	"LogFile":"",
+	"LogLevel":"debug"
 }

@@ -3,6 +3,7 @@ package lib
 import (
 	"errors"
 	"net/http"
+	"net/url"
 )
 
 type Service struct {
@@ -52,7 +53,7 @@ func (s *Service) Status() (*Status, error) {
 // as a NewTask struct.
 func (s *Service) NewTask(sample string) (*NewTask, error) {
 	nt := &NewTask{}
-	_, httpStatus, err := FastGet(s.Client, s.URL+"/feed/"+sample, nt)
+	_, httpStatus, err := FastGet(s.Client, s.URL+"/feed/?obj="+url.QueryEscape(sample), nt)
 	if httpStatus != 200 && err == nil {
 		err = errors.New("Returned non-200 status code")
 	}
@@ -68,7 +69,7 @@ func (s *Service) NewTask(sample string) (*NewTask, error) {
 // return the result as a CheckTask struct.
 func (s *Service) CheckTask(taskID string) (*CheckTask, error) {
 	ct := &CheckTask{}
-	_, httpStatus, err := FastGet(s.Client, s.URL+"/check/"+taskID, ct)
+	_, httpStatus, err := FastGet(s.Client, s.URL+"/check/?taskid="+url.QueryEscape(taskID), ct)
 	if httpStatus != 200 && err == nil {
 		err = errors.New("Returned non-200 status code")
 	}
@@ -84,7 +85,7 @@ func (s *Service) CheckTask(taskID string) (*CheckTask, error) {
 // and returns them as a TaskResults struct.
 func (s *Service) TaskResults(taskID string) (*TaskResults, error) {
 	tr := &TaskResults{}
-	_, httpStatus, err := FastGet(s.Client, s.URL+"/results/"+taskID, tr)
+	_, httpStatus, err := FastGet(s.Client, s.URL+"/results/?taskid="+url.QueryEscape(taskID), tr)
 	if httpStatus != 200 && err == nil {
 		err = errors.New("Returned non-200 status code")
 	}
