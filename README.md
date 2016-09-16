@@ -1,14 +1,26 @@
-# Holmes-Totem-Dynamic: An Investigation Planner for large-scale file analysis that requires delayed results. This Planner is optimized for managing long running services.
+# Holmes-Totem-Dynamic: An Investigation Planner for managing long running services.
 
 ## Overview
+
+Just like Holmes-Totem the "Dynamic" Planner is responsible for turning data into information by performing feature extraction against submitted objects. When tasked, Holmes-Totem-Dynamic schedules the execution of its services which are focused on dynamic and other long or indefinite running analysis tasks. 
+
+
+![Diagramm of Totem-Dynamic](https://i.imgur.com/WmZzxzF.png)
 
 
 ## Dependencies
 
+The only needed dependency is a AMQP library for Go. If you setup your [Go environment](https://golang.org/doc/install) correctly you can simple do a
+
+    go get -u github.com/streadway/amqp
+
+and you are done.
+
 
 ## Compilation
 
-After cloning this project you can simple build it using `go build` or `go install`. This requires a configured and working [Go environment](https://golang.org/doc/install).
+After cloning this project you can build it using `go build` or `go install`. This requires a configured and working [Go environment](https://golang.org/doc/install).
+
 
 ## Installation
 
