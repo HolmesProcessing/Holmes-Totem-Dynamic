@@ -5,8 +5,21 @@
 Just like Holmes-Totem the "Dynamic" Planner is responsible for turning data into information by performing feature extraction against submitted objects. When tasked, Holmes-Totem-Dynamic schedules the execution of its services which are focused on dynamic and other long or indefinite running analysis tasks. 
 
 
+## Highlights
+
+### Inner workings
+
+Totem-Dynamic is based on distributed_cuckoo and uses a similar concept. Just like Totem it accepts incoming tasks via AMQP and sends the results back via AMQP as soon as they are availible.
+Internally the application is mostly devided in three parts. `feed` is accepting new tasks from the outside, checks the status of the requested service and - if everything is fine - submits the task to the service or else postpones it until the service status is good again.  `check` then periodically checks if the service is done with the task or if it still need time or if an error occured. `submit` then collects the results from the service and sends it out 
+
 ![Diagramm of Totem-Dynamic](https://i.imgur.com/WmZzxzF.png)
 
+###
+
+| Name               | Object Type           | Description     |
+| ------------------ | --------------------- | --------------- |
+| cuckoo             | Binary Executable     | Performs a cuckoo analysis on the given binaries
+| VirusTotal **PLANNED**         | Binary Executable, IPv4/6, Domain | Returns available [VirusTotal](https://www.virustotal.com/) information with a public or private key
 
 ## Dependencies
 
