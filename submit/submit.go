@@ -86,17 +86,17 @@ func (c *sCtx) submitResults(req *lib.InternalRequest, msg *amqp.Delivery) {
 	}
 
 	// TODO: check if it is still necessary to handle service results as string
-	resultsJ, err := json.Marshal(serviceResults)
+	resultsJ, err := json.Marshal(serviceResults.Results)
 
 	// generate the necessary hashes, differentiate between samples and urls
 	var fileBytes []byte
 	if req.OriginalRequest.Download {
-		fileBytes, err = ioutil.ReadFile(req.FilePath)
+		fileBytes, err = ioutil.ReadFile("/tmp/" + req.FilePath)
 		if c.NackOnError(err, "Could not read sample file", msg) {
 			return
 		}
 	} else {
-		fileBytes = []byte(req.FilePath)
+		fileBytes = []byte("/tmp/" + req.FilePath)
 	}
 
 	hSHA256 := sha256.New()

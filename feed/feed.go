@@ -65,6 +65,11 @@ func (c *fCtx) parseMsg(msg amqp.Delivery) {
 			continue
 		}
 
+		if len(urls) == 0 {
+			c.Warning.Println("Service is existing in config but no URLs are supplied")
+			continue
+		}
+
 		service := &lib.Service{
 			Name:   serviceName,
 			URL:    urls[rand.Intn(len(urls))],
