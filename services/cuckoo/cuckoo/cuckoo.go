@@ -87,15 +87,15 @@ type TasksReportBhvPcs struct {
 }
 
 type TasksReportBhvPcsCall struct {
-	Category  string                      `json:"category"`
-	Status    bool                        `json:"status"`
-	Return    string                      `json:"return"`
-	Timestamp string                      `json:"timestamp"`
-	ThreadId  string                      `json:"thread_id"`
-	Repeated  int                         `json:"repeated"`
-	Api       string                      `json:"api"`
-	Arguments []*TasksReportBhvPcsCallArg `json:"arguments"`
-	Id        int                         `json:"id"`
+	Category  string          `json:"category"`
+	Status    int             `json:"status"`
+	Return    string          `json:"return"`
+	Timestamp string          `json:"timestamp"`
+	ThreadId  string          `json:"thread_id"`
+	Repeated  int             `json:"repeated"`
+	Api       string          `json:"api"`
+	Arguments json.RawMessage `json:"arguments"`
+	Id        int             `json:"id"`
 }
 
 type TasksReportBhvPcsCallArg struct {

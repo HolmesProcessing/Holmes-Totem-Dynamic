@@ -117,7 +117,9 @@ func HTTPStatus(w http.ResponseWriter, r *http.Request) {
 	resp.FreeSlots = ctx.Config.MaxPending - s.Tasks.Pending
 
 	if ctx.Config.CheckFreeSpace {
-		if s.Diskspace.Analyses.Free <= 256*1024*1024 {
+		if s.Diskspace != nil &&
+			s.Diskspace.Analyses != nil &&
+			s.Diskspace.Analyses.Free <= 256*1024*1024 {
 			resp.Degraded = true
 			resp.Error = "Disk is full!"
 		}
